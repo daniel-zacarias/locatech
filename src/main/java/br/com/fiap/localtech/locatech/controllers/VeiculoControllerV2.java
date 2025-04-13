@@ -1,10 +1,14 @@
 package br.com.fiap.localtech.locatech.controllers;
 
+import br.com.fiap.localtech.locatech.dtos.ResourceNotFoundDTO;
+import br.com.fiap.localtech.locatech.dtos.ValidationErrorDto;
 import br.com.fiap.localtech.locatech.dtos.VeiculoRequestDTO;
 import br.com.fiap.localtech.locatech.entities.Veiculo;
 import br.com.fiap.localtech.locatech.services.VeiculoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,9 +50,18 @@ public class VeiculoControllerV2 {
         return ResponseEntity.ok(veiculos);
     }
 
+    @Operation(
+            summary = "Buscar veículo por ID",
+            description = "Retorna os dados de um véículo com base no ID fornecido.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Pessoa encontrada"),
+                    @ApiResponse(responseCode = "404", description = "Veículo não encontrado",
+                            content = @Content(schema = @Schema(implementation = ResourceNotFoundDTO.class)))
+            }
+    )
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Veiculo>> findVeiculo(
-            @PathVariable Long id
+    public ResponseEntity<Optional<Veiculo>> findPessoa(
+            @Parameter(description = "ID do veículp", example = "1") @PathVariable Long id
     ) {
         logger.info("/veiculos/" + id);
         var veiculo = this.veiculoService.findByVeiculoId(id);
@@ -59,7 +72,9 @@ public class VeiculoControllerV2 {
             summary = "Cadastrar novo veículo",
             description = "Cria um novo veículo com os dados enviados.",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Veículo criado com sucesso")
+                    @ApiResponse(responseCode = "201", description = "Veículo criado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Veículo inválido",
+                            content = @Content(schema = @Schema(implementation = ValidationErrorDto.class)))
             }
     )
     @PostMapping
@@ -71,20 +86,37 @@ public class VeiculoControllerV2 {
         return ResponseEntity.status(201).build();
     }
 
+    @Operation(
+            summary = "Atualizar veículo",
+            description = "Atualiza os dados de um veículo existente.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Veículo atualizado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Veículo não encontrado",
+                            content = @Content(schema = @Schema(implementation = ResourceNotFoundDTO.class)))
+            }
+    )
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateVeiculo(
-            @PathVariable Long id,
-            @RequestBody @Valid VeiculoRequestDTO veiculo
+            @Parameter(description = "Id do veículo atualizado") @PathVariable Long id,
+            @Parameter(description = "Dados do veículo") @RequestBody @Valid VeiculoRequestDTO veiculo
     ) {
         logger.info("PUT -> /veiculos/");
         this.veiculoService.updateVeiculo(veiculo, id);
         return ResponseEntity.status(204).build();
     }
 
+    @Operation(
+            summary = "Deletar veículo",
+            description = "Deleta os dados de um veículo existente.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Veículo deletado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Veículo não encontrado", content = @Content(schema = @Schema(implementation = ResourceNotFoundDTO.class)))
+            }
+    )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVeiculo(
-            @PathVariable Long id
-    ){
+            @Parameter(description = "Id do veículo a ser deletado") @PathVariable Long id
+    ) {
         logger.info("DELETE -> /veiculos/");
         this.veiculoService.delete(id);
         return ResponseEntity.ok().build();

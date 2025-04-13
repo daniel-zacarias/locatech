@@ -5,6 +5,7 @@ import br.com.fiap.localtech.locatech.services.PessoaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/pessoas")
+@Tag(name = "Pessoa", description = "Controller para crud de pessoas")
 public class PessoaController {
 
     private static final Logger logger = LoggerFactory.getLogger(PessoaController.class);
@@ -46,8 +48,7 @@ public class PessoaController {
             summary = "Buscar pessoa por ID",
             description = "Retorna os dados de uma pessoa com base no ID fornecido.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Pessoa encontrada"),
-                    @ApiResponse(responseCode = "404", description = "Pessoa não encontrada")
+                    @ApiResponse(responseCode = "200", description = "Pessoa encontrada")
             }
     )
     @GetMapping("/{id}")
@@ -80,7 +81,6 @@ public class PessoaController {
             description = "Atualiza as informações de uma pessoa existente.",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Pessoa atualizada com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Pessoa não encontrada")
             }
     )
     @PutMapping("/{id}")
@@ -98,7 +98,6 @@ public class PessoaController {
             description = "Remove uma pessoa com base no ID informado.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Pessoa removida com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Pessoa não encontrada")
             }
     )
     @DeleteMapping("/{id}")

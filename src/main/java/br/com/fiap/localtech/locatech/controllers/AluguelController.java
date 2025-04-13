@@ -6,6 +6,7 @@ import br.com.fiap.localtech.locatech.services.AluguelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/alugueis")
+@Tag(name = "Aluguel", description = "Controller para crud de alugueis")
 public class AluguelController {
 
     private static final Logger logger = LoggerFactory.getLogger(AluguelController.class);
@@ -49,7 +51,7 @@ public class AluguelController {
             description = "Retorna um aluguel com base no ID informado.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Aluguel encontrado"),
-                    @ApiResponse(responseCode = "404", description = "Aluguel não encontrado")
+                    @ApiResponse(responseCode = "500", description = "Aluguel não encontrado")
             }
     )
     @GetMapping("/{id}")
