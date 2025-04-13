@@ -1,7 +1,10 @@
 package br.com.fiap.localtech.locatech.services;
 
+import br.com.fiap.localtech.locatech.dtos.VeiculoRequestDTO;
 import br.com.fiap.localtech.locatech.entities.Veiculo;
 import br.com.fiap.localtech.locatech.repositories.VeiculoRepository;
+import br.com.fiap.localtech.locatech.services.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -24,7 +27,8 @@ public class VeiculoService {
     }
 
     public Optional<Veiculo> findByVeiculoId(Long id) {
-        return this.veiculoRepository.findById(id);
+        return Optional.ofNullable(this.veiculoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Veículo não encontrado")));
     }
 
     public void saveVeiculo(Veiculo veiculo) {
@@ -35,15 +39,24 @@ public class VeiculoService {
     public void updateVeiculo(Veiculo veiculo, Long id) {
         var update = this.veiculoRepository.update(veiculo, id);
         if(update == 0) {
-            throw new RuntimeException("Veículo não encontrado");
+            throw new ResourceNotFoundException("Veículo não encontrado");
         }
     }
 
     public void delete(Long id) {
         var delete = this.veiculoRepository.delete(id);
         if(delete == 0) {
-            throw new RuntimeException("Veículo não encontrado");
+            throw new ResourceNotFoundException("Veículo não encontrado");
         }
     }
 
+    public void saveVeiculo(VeiculoRequestDTO veiculo) {
+        Veiculo veiculoEntity = new Veiculo(veiculo);
+        this.saveVeiculo(veiculoEntity);
+    }
+
+    public void updateVeiculo(@Valid VeiculoRequestDTO veiculo, Long id) {
+        Veiculo veiculoEntity = new Veiculo(veiculo);
+        this.updateVeiculo(veiculoEntity, id);
+    }
 }

@@ -1,10 +1,12 @@
 package br.com.fiap.localtech.locatech.services;
 
 import br.com.fiap.localtech.locatech.dtos.AluguelRequestDTO;
+import br.com.fiap.localtech.locatech.dtos.AluguelRequestDTOV2;
 import br.com.fiap.localtech.locatech.entities.Aluguel;
 import br.com.fiap.localtech.locatech.repositories.AluguelRepository;
 import br.com.fiap.localtech.locatech.repositories.VeiculoRepository;
 import br.com.fiap.localtech.locatech.services.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -43,20 +45,20 @@ public class AluguelService {
     public void updateAluguel(Aluguel aluguel, Long id) {
         var update = this.aluguelRepository.update(aluguel, id);
         if (update == 0) {
-            throw new RuntimeException("Veículo não encontrado");
+            throw new ResourceNotFoundException("Aluguel não encontrado");
         }
     }
 
     public void delete(Long id) {
         var delete = this.aluguelRepository.delete(id);
         if (delete == 0) {
-            throw new RuntimeException("Veículo não encontrado");
+            throw new ResourceNotFoundException("Aluguel não encontrado");
         }
     }
 
     private Aluguel calculaAluguel(AluguelRequestDTO aluguelRequestDTO) {
         var veiculo = this.veiculoRepository.findById(aluguelRequestDTO.veiculoId())
-                .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Aluguel não encontrado"));
 
         var quantidadeDias = BigDecimal.valueOf(aluguelRequestDTO.dataFim().getDayOfYear() -
                 aluguelRequestDTO.dataInicio().getDayOfYear());
@@ -65,5 +67,26 @@ public class AluguelService {
                 aluguelRequestDTO,
                 valor
         );
+    }
+
+    public void saveAluguel(@Valid AluguelRequestDTOV2 aluguel) {
+        AluguelRequestDTO dto = new AluguelRequestDTO(
+                aluguel.pessoaId(),
+                aluguel.veiculoId(),
+                aluguel.dataInicio(),
+                aluguel.dataFim()
+        );
+        this.saveAluguel(dto);
+    }
+
+    public void updateAluguel(@Valid AluguelRequestDTOV2 aluguel, Long id) {
+        AluguelRequestDTO dto = new AluguelRequestDTO(
+                aluguel.pessoaId(),
+                aluguel.veiculoId(),
+                aluguel.dataInicio(),
+                aluguel.dataFim()
+        );
+        Aluguel aluguelEntity = this.calculaAluguel(dto);
+        this.updateAluguel(aluguelEntity, id);
     }
 }

@@ -1,12 +1,13 @@
 package br.com.fiap.localtech.locatech.controllers;
 
+import br.com.fiap.localtech.locatech.dtos.VeiculoRequestDTO;
 import br.com.fiap.localtech.locatech.entities.Veiculo;
 import br.com.fiap.localtech.locatech.services.VeiculoService;
-import br.com.fiap.localtech.locatech.services.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +17,15 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/v1/veiculos")
+@RequestMapping("/v2/veiculos")
 @Tag(name = "Veículo", description = "Controller para crud de veículos")
-public class VeiculoController {
+public class VeiculoControllerV2 {
 
-    private static final Logger logger = LoggerFactory.getLogger(VeiculoController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VeiculoControllerV2.class);
 
     private final VeiculoService veiculoService;
 
-    public VeiculoController(VeiculoService veiculoService) {
+    public VeiculoControllerV2(VeiculoService veiculoService) {
         this.veiculoService = veiculoService;
     }
 
@@ -45,25 +46,13 @@ public class VeiculoController {
         return ResponseEntity.ok(veiculos);
     }
 
-    @Operation(
-            description = "Busca veículo pelo ID",
-            summary = "Busca veículo",
-            responses = {
-                    @ApiResponse(description = "OK", responseCode = "200")
-            }
-    )
     @GetMapping("/{id}")
     public ResponseEntity<Optional<Veiculo>> findVeiculo(
             @PathVariable Long id
     ) {
         logger.info("/veiculos/" + id);
-        try {
-            var veiculo = this.veiculoService.findByVeiculoId(id);
-            return ResponseEntity.ok(veiculo);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.ok(null);
-        }
-
+        var veiculo = this.veiculoService.findByVeiculoId(id);
+        return ResponseEntity.ok(veiculo);
     }
 
     @Operation(
@@ -75,42 +64,26 @@ public class VeiculoController {
     )
     @PostMapping
     public ResponseEntity<Void> saveVeiculo(
-            @Parameter(description = "Dados do veículo") @RequestBody Veiculo veiculo
+            @Parameter(description = "Dados do veículo") @RequestBody VeiculoRequestDTO veiculo
     ) {
         logger.info("POST -> /veiculos");
         this.veiculoService.saveVeiculo(veiculo);
         return ResponseEntity.status(201).build();
     }
 
-    @Operation(
-            summary = "Atualizar veículo",
-            description = "Atualiza os dados de um veículo existente.",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "Veículo atualizado com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Veículo não encontrado")
-            }
-    )
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateVeiculo(
-            @Parameter(description = "ID do veículo") @PathVariable Long id,
-            @Parameter(description = "Novos dados do veículo") @RequestBody Veiculo veiculo
+            @PathVariable Long id,
+            @RequestBody @Valid VeiculoRequestDTO veiculo
     ) {
         logger.info("PUT -> /veiculos/");
         this.veiculoService.updateVeiculo(veiculo, id);
         return ResponseEntity.status(204).build();
     }
 
-    @Operation(
-            summary = "Remover veículo",
-            description = "Remove um veículo com base no ID informado.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Veículo removido com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Veículo não encontrado")
-            }
-    )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVeiculo(
-            @Parameter(description = "ID do veículo a ser removido") @PathVariable Long id
+            @PathVariable Long id
     ){
         logger.info("DELETE -> /veiculos/");
         this.veiculoService.delete(id);
